@@ -3,8 +3,8 @@ resource "aws_instance" "ubuntu_minikube" {
   instance_type = "t2.medium"
   key_name      = var.key_name
 #  subnet_id     = aws_subnet.public_subnet.id
- # security_groups = [aws_security_group.ec2_sg.name]
-  vpc_security_group_ids = [aws_security_group.ec2_sg.name]
+  security_groups = [aws_security_group.ec2_sg.name]
+ # vpc_security_group_ids = [aws_security_group.ec2_sg.name]
 
   tags = {
     Name = "Minikube-Ubuntu"
