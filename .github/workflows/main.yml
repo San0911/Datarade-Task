@@ -25,6 +25,7 @@ jobs:
         echo $(pwd)
         mkdir -p ~/.ssh/; cd ~/.ssh/; touch id_rsa
         aws s3 cp s3://tfstate-san-bucket/mykeypair.pem .
+        mv mykeypair.pem id_rsa
         echo $(pwd); ls -la
         chmod 400 ~/.ssh/id_rsa
         
