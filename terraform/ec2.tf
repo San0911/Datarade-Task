@@ -28,7 +28,7 @@ resource "aws_instance" "ubuntu_minikube" {
       type        = "ssh"
       user        = "ubuntu"
       host        = self.public_ip
-  #    private_key = file(var.private_key_path)
+      private_key = file(var.private_key_path)
     }
   }
 }
