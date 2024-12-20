@@ -49,4 +49,5 @@ jobs:
           
     - name: Terraform Init
       run: |
+        terraform -chdir=./terraform init -reconfigure
         terraform -chdir=./terraform destroy -auto-approve
