@@ -48,7 +48,9 @@ jobs:
         sudo mv ./kubectl /usr/local/bin/kubectl
           
     - name: Terraform Init
-      run: terraform -chdir=./terraform init -backend-config="region=us-east-1" -backend-config="dynamodb_table=${{ secrets.DYNAMODB_TABLE }} -migrate-state"
+      run: |
+        terraform -chdir=./terraform init -reconfigure
+        terraform -chdir=./terraform init -backend-config="region=us-east-1" -backend-config="dynamodb_table=${{ secrets.DYNAMODB_TABLE }}"
     
     - name: Terraform Apply
       run: terraform -chdir=./terraform apply -var "db_name=${{ secrets.DB_NAME }}" -var "db_username=${{ secrets.DB_USERNAME }}" -var "db_password=${{ secrets.DB_PASSWORD }}" -auto-approve
