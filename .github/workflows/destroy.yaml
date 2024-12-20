@@ -1,0 +1,52 @@
+name: Destroy infra
+
+on:
+#  push:
+#    branches:
+#      - main
+  workflow_dispatch:    
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v2
+    
+    - name: Set up AWS CLI
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: "us-east-1"
+
+    - name: Download Private Key from S3
+      run: |
+        echo $(pwd)
+        mkdir -p ~/.ssh/; cd ~/.ssh/; touch id_rsa
+        aws s3 cp s3://tfstate-san-bucket/mykeypair.pem .
+        mv mykeypair.pem id_rsa
+        echo $(pwd); ls -la
+        chmod 400 ~/.ssh/id_rsa
+        
+
+    - name: Install Terraform
+      run: |
+        sudo apt-get update -y
+        sudo apt-get install -y gnupg software-properties-common
+        wget -qO- https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
+        sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com focal main"
+        sudo apt-get update
+        sudo apt-get install terraform
+    
+    - name: Install kubectl
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y apt-transport-https curl
+        curl -LO "https://storage.googleapis.com/kubernetes-release/release/latest/bin/linux/amd64/kubectl"
+        chmod +x ./kubectl
+        sudo mv ./kubectl /usr/local/bin/kubectl
+          
+    - name: Terraform Init
+      run: |
+        terraform -chdir=./terraform destroy -auto-approve
