@@ -1,0 +1,36 @@
+name: Deploy AWS Infra and App
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Set up Terraform
+      uses: hashicorp/setup-terraform@v2
+
+    - name: Terraform Init and Apply
+      working-directory: terraform
+      run: |
+        terraform init
+        terraform apply -auto-approve \
+          -var "key_name=${{ secrets.EC2_KEY_NAME }}" \
+          -var "private_key_path=${{ secrets.PRIVATE_KEY_PATH }}" \
+          -var "db_name=${{ secrets.DB_NAME }}" \
+          -var "db_username=${{ secrets.DB_USERNAME }}" \
+          -var "db_password=${{ secrets.DB_PASSWORD }}"
+
+    - name: Deploy App to Minikube
+      run: |
+        ssh -i ${{ secrets.PRIVATE_KEY_PATH }} ubuntu@$(terraform output -raw ec2_public_ip) <<EOF
+        kubectl apply -f k8s/secret.yaml
+        kubectl apply -f k8s/deployment.yaml
+        kubectl apply -f k8s/service.yaml
+        EOF
