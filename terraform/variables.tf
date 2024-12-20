@@ -5,7 +5,10 @@ variable "ubuntu_ami_id" {
 variable "key_name" {
   default = "mykeypair"
 }
-variable "private_key_path" {}
+
+variable "private_key_path" {
+  default = "~/.ssh/id_rsa"
+}
 
 variable "db_name" {}
 variable "db_username" {}

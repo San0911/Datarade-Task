@@ -1,9 +1,9 @@
 name: Deploy to Minikube
 
 on:
-  push:
-    branches:
-      - main
+#  push:
+#    branches:
+#      - main
   workflow_dispatch:    
 
 jobs:
@@ -19,6 +19,16 @@ jobs:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: "us-east-1"
+
+    - name: Download Private Key from S3
+      run: |
+        echo $(pwd)
+        mkdir -p ~/.ssh/; cd ~/.ssh/; touch id_rsa
+        aws s3 cp s3://tfstate-san-bucket/mykeypair.pem .
+        mv mykeypair.pem id_rsa
+        echo $(pwd); ls -la
+        chmod 400 ~/.ssh/id_rsa
+        
 
     - name: Install Terraform
       run: |
@@ -38,7 +48,9 @@ jobs:
         sudo mv ./kubectl /usr/local/bin/kubectl
           
     - name: Terraform Init
-      run: terraform -chdir=./terraform init -backend-config="region=us-east-1" -backend-config="dynamodb_table=${{ secrets.DYNAMODB_TABLE }}"
+      run: |
+        terraform -chdir=./terraform init -reconfigure
+        terraform -chdir=./terraform init -backend-config="region=us-east-1" -backend-config="dynamodb_table=${{ secrets.DYNAMODB_TABLE }}"
     
     - name: Terraform Apply
       run: terraform -chdir=./terraform apply -var "db_name=${{ secrets.DB_NAME }}" -var "db_username=${{ secrets.DB_USERNAME }}" -var "db_password=${{ secrets.DB_PASSWORD }}" -auto-approve
