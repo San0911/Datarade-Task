@@ -23,8 +23,9 @@ jobs:
     - name: Download Private Key from S3
       run: |
         echo $(pwd)
-        mkdir -p ~/.ssh/id_rsa
-        aws s3 cp s3://tfstate-san-bucket/mykeypair.pem ~/.ssh/id_rsa
+        mkdir -p ~/.ssh/; cd ~/.ssh/; touch id_rsa
+        aws s3 cp s3://tfstate-san-bucket/mykeypair.pem .
+        echo $(pwd); ls -la
         chmod 400 ~/.ssh/id_rsa
         
 
