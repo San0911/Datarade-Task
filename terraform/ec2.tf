@@ -28,3 +28,4 @@ resource "aws_instance" "ubuntu_minikube" {
     }
   }
 }
+

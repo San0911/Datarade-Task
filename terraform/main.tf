@@ -4,17 +4,21 @@ provider "aws" {
 
 # Include all resource files
 module "network" {
-  source = "./network.tf"
+  source = "./terraform/network.tf"
 }
 
 module "ec2" {
-  source = "./ec2.tf"
+  source = "./terraform/ec2.tf"
 }
 
 module "rds" {
-  source = "./rds.tf"
+  source = "./terraform/rds.tf"
 }
 
 module "security_groups" {
-  source = "./security_groups.tf"
+  source = "./terraform/security_groups.tf"
+}
+
+module "backend" {
+  source = "./terraform/backend.tf"
 }
