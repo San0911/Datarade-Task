@@ -1,4 +1,4 @@
-name: Deploy AWS Infra and App
+name: Deploy to Minikube
 
 on:
   push:
@@ -6,31 +6,35 @@ on:
       - main
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
-
     steps:
     - name: Checkout Code
-      uses: actions/checkout@v3
-
-    - name: Set up Terraform
-      uses: hashicorp/setup-terraform@v2
-
-    - name: Terraform Init and Apply
-      working-directory: terraform
+      uses: actions/checkout@v2
+    
+    - name: Set up AWS CLI
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: "us-east-1"
+    
+    - name: Terraform Init
+      run: terraform init -backend-config="region=us-east-1" -backend-config="dynamodb_table=${{ secrets.DYNAMODB_TABLE }}"
+    
+    - name: Terraform Apply
+      run: terraform apply -var "db_name=${{ secrets.DB_NAME }}" -var "db_username=${{ secrets.DB_USERNAME }}" -var "db_password=${{ secrets.DB_PASSWORD }}" -auto-approve
+    
+    - name: Deploy to Kubernetes
       run: |
-        terraform init
-        terraform apply -auto-approve \
-          -var "key_name=${{ secrets.EC2_KEY_NAME }}" \
-          -var "private_key_path=${{ secrets.PRIVATE_KEY_PATH }}" \
-          -var "db_name=${{ secrets.DB_NAME }}" \
-          -var "db_username=${{ secrets.DB_USERNAME }}" \
-          -var "db_password=${{ secrets.DB_PASSWORD }}"
-
-    - name: Deploy App to Minikube
-      run: |
-        ssh -i ${{ secrets.PRIVATE_KEY_PATH }} ubuntu@$(terraform output -raw ec2_public_ip) <<EOF
         kubectl apply -f k8s/secret.yaml
         kubectl apply -f k8s/deployment.yaml
         kubectl apply -f k8s/service.yaml
-        EOF
+    
+    - name: Minikube ingress
+      run: kubectl expose deployment sample-app --type=LoadBalancer --name=sample-app-service --port=80 --target-port=5000
+    
+    - name: Test Application Health
+      run: |
+        echo "Checking application health..."
+        curl -s http://localhost:5000/health
