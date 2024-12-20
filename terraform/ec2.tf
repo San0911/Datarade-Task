@@ -13,6 +13,9 @@ resource "aws_instance" "ubuntu_minikube" {
   provisioner "remote-exec" {
     inline = [
       "sudo apt-get update -y",
+      "aws s3 cp s3://tfstate-san-bucket/mykeypair.pem ~/"
+      "mv ~/mykeypair.pem ~/.ssh/id_rsa"
+      "chmod 400 ~/.ssh/id_rsa"
       "sudo apt-get install -y curl conntrack apt-transport-https docker.io",
       "sudo systemctl start docker",
       "curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64",
