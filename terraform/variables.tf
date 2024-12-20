@@ -6,7 +6,7 @@ variable "key_name" {
   default = "mykeypair"
 }
 variable "private_key_path" {
-  default     = "~/.ssh/id_rsa"
+  default     = "/home/ubuntu/.ssh/id_rsa"
 }
 
 variable "db_name" {}
