@@ -7,6 +7,7 @@ variable "key_name" {
 }
 
 variable "private_key_path" {
+  default = "~/.ssh/id_rsa"
 }
 
 variable "db_name" {}
