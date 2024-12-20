@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:    
 
 jobs:
   build:
@@ -19,11 +20,16 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: "us-east-1"
     
+    - name: Set up Terraform
+      run: |
+        sudo apt-get update -y
+        sudo apt-get install -y terraform
+    
     - name: Terraform Init
-      run: terraform init -backend-config="region=us-east-1" -backend-config="dynamodb_table=${{ secrets.DYNAMODB_TABLE }}"
+      run: terraform -chdir=./terraform init -backend-config="region=us-east-1" -backend-config="dynamodb_table=${{ secrets.DYNAMODB_TABLE }}"
     
     - name: Terraform Apply
-      run: terraform apply -var "db_name=${{ secrets.DB_NAME }}" -var "db_username=${{ secrets.DB_USERNAME }}" -var "db_password=${{ secrets.DB_PASSWORD }}" -auto-approve
+      run: terraform -chdir=./terraform apply -var "db_name=${{ secrets.DB_NAME }}" -var "db_username=${{ secrets.DB_USERNAME }}" -var "db_password=${{ secrets.DB_PASSWORD }}" -auto-approve
     
     - name: Deploy to Kubernetes
       run: |
