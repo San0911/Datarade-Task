@@ -6,8 +6,8 @@ variable "key_name" {
   default = "mykeypair"
 }
 
-#variable "private_key_path" {
-#}
+variable "private_key_path" {
+}
 
 variable "db_name" {}
 variable "db_username" {}
