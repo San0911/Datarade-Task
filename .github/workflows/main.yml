@@ -20,6 +20,12 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: "us-east-1"
 
+    - name: Download Private Key from S3
+      run: |
+        aws s3 cp s3://tfstate-san-bucket/mykeypair.pem ~/.ssh/id_rsa
+        chmod 400 ~/.ssh/id_rsa
+        
+
     - name: Install Terraform
       run: |
         sudo apt-get update -y
